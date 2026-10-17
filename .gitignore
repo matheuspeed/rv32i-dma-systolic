@@ -1,0 +1,35 @@
+# Xcelium / SimVision
+xcelium.d/
+INCA_libs/
+*.shm/
+.simvision/
+*.history
+*.key
+*.diag
+waves.*
+
+# Icarus Verilog
+*.vvp
+*.vcd
+
+# Cópia do programa feita pelo Makefile na pasta de simulação
+sim/imem.hex
+
+# Genus (os relatórios .rpt em syn/reports/ SÃO versionados)
+genus.cmd*
+genus.log*
+fv/
+syn/work/
+
+# Logs em geral
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
