@@ -64,7 +64,7 @@ na mesma pasta do `.asm`.
 
 ## Equipe
 
-- 
-- 
-- 
-- 
+- Dhene Arlis
+- Jessica Caroline
+- Matheus Freitas
+- Venicius Santos
