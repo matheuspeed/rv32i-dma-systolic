@@ -21,7 +21,12 @@ Há três níveis de referência, que precisam dar o mesmo resultado:
 
 Uso:
   python matmul_tiled.py --selftest
-      compara os três modelos para vários tamanhos e para S = 2, 4 e 8
+      compara os três modelos para vários tamanhos e para S = 2, 4 e 8,
+      com uma tabela de cada caso
+
+  python matmul_tiled.py --demo
+      exemplo pequeno (4x4, malha 2x2) mostrando os blocos do tiling e a
+      malha sistólica ciclo a ciclo
 
   python matmul_tiled.py --m 16 --n 16 --k 16 --s 4 --out vetores
       gera os arquivos de teste para os testbenches (ver gera_vetores)
@@ -64,7 +69,7 @@ def matmul_ref(A, B):
 # ---------------------------------------------------------------------------
 # 3. Malha sistólica output-stationary, ciclo a ciclo
 # ---------------------------------------------------------------------------
-def systolic_tile(a_tile, b_tile, acc, s):
+def systolic_tile(a_tile, b_tile, acc, s, trace=None):
     """
     Processa um bloco de K na malha S x S.
 
@@ -76,6 +81,9 @@ def systolic_tile(a_tile, b_tile, acc, s):
     a coluna j de B entra por cima da coluna j atrasada j ciclos (skew). Cada
     MAC (i, j) multiplica o que chega, acumula e repassa A para a direita e
     B para baixo no ciclo seguinte.
+
+    Se trace for uma lista, recebe o estado de cada ciclo (entradas nas
+    bordas e acumuladores), usado pelo modo --demo.
 
     Retorna o número de ciclos gastos: KB + 2*(S-1).
     """
@@ -96,16 +104,22 @@ def systolic_tile(a_tile, b_tile, acc, s):
                 acc[i][j] = wrap32(acc[i][j] + a * b)
                 novo_a[i][j], novo_b[i][j] = a, b
         a_reg, b_reg = novo_a, novo_b
+        if trace is not None:
+            trace.append(dict(t=t, a_in=a_in, b_in=b_in,
+                              a=[r[:] for r in novo_a], b=[r[:] for r in novo_b],
+                              acc=[r[:] for r in acc]))
     return ciclos
 
 
 # ---------------------------------------------------------------------------
 # 2. Multiplicação por blocos, na ordem em que o DMA trabalha
 # ---------------------------------------------------------------------------
-def matmul_tiled(A, B, s, buf_depth, sistolico=True):
+def matmul_tiled(A, B, s, buf_depth, sistolico=True, log=None, trace_primeiro=None):
     """
     Retorna (C, estatisticas). Com sistolico=True cada bloco é calculado pela
     simulação ciclo a ciclo da malha; com False, por soma direta.
+    log: função chamada com uma linha de texto por passo do DMA (modo --demo).
+    trace_primeiro: lista que recebe o trace ciclo a ciclo da 1a passagem.
     """
     m, k, n = len(A), len(B), len(B[0])
     check_dims(m, n, k, s)
@@ -115,13 +129,19 @@ def matmul_tiled(A, B, s, buf_depth, sistolico=True):
     for ti in range(0, m, s):                    # linha de blocos de C
         for tj in range(0, n, s):                # coluna de blocos de C
             acc = [[0] * s for _ in range(s)]    # acc_clear
+            if log:
+                log(f'Bloco C[{ti}:{ti + s}, {tj}:{tj + s}]   (acc_clear: acumuladores = 0)')
             for k0 in range(0, k, buf_depth):    # blocos de K
                 kb = min(buf_depth, k - k0)
+                if log:
+                    log(f'   DMA carrega A[{ti}:{ti + s}, {k0}:{k0 + kb}] -> Buffer A   '
+                        f'B[{k0}:{k0 + kb}, {tj}:{tj + s}] -> Buffer B   -> malha')
                 # DMA: carrega Buffer A (S linhas) e Buffer B (S colunas)
                 a_tile = [A[ti + i][k0:k0 + kb] for i in range(s)]
                 b_tile = [B[k0 + x][tj:tj + s] for x in range(kb)]
                 if sistolico:
-                    est['ciclos_malha'] += systolic_tile(a_tile, b_tile, acc, s)
+                    tr = trace_primeiro if (trace_primeiro is not None and est['blocos_K'] == 0) else None
+                    est['ciclos_malha'] += systolic_tile(a_tile, b_tile, acc, s, tr)
                 else:
                     for i in range(s):
                         for j in range(s):
@@ -132,6 +152,8 @@ def matmul_tiled(A, B, s, buf_depth, sistolico=True):
             for i in range(s):
                 for j in range(s):
                     C[ti + i][tj + j] = acc[i][j]
+            if log:
+                log(f'   DMA grava o bloco em C:  {acc}')
             est['blocos_C'] += 1
     return C, est
 
@@ -204,31 +226,83 @@ def gera_vetores(m, n, k, s, buf_depth, seed, out):
           f'dmem_init.hex dmem_expected.hex params.txt')
 
 
+def fmt_mat(M, w=6):
+    return '\n'.join('   [' + ' '.join(f'{v:{w}d}' for v in linha) + ' ]' for linha in M)
+
+
 def selftest():
     rng = random.Random(2026)
-    casos = 0
+    print(f'{"S":>2} {"M x K x N":>11} {"BUF":>4} {"blocos C":>9} {"passagens":>9} '
+          f'{"ciclos malha":>12} {"maior |C|":>10}   resultado')
+    print('-' * 80)
+    casos = falhas = 0
     for s in (2, 4, 8):
-        for (m, n, k) in ((s, s, s), (8, 8, 8), (16, 16, 16), (8, 16, 24), (16, 8, 40)):
+        tamanhos = dict.fromkeys(((s, s, s), (8, 8, 8), (16, 16, 16), (8, 16, 24), (16, 8, 40)))
+        for (m, n, k) in tamanhos:
             if m % s or n % s or k % s:
                 continue
             for buf in (s, 16):
                 A = rand_matrix(m, k, rng)
                 B = rand_matrix(k, n, rng)
                 ref = matmul_ref(A, B)
-                assert matmul_tiled(A, B, s, buf, sistolico=False)[0] == ref
-                assert matmul_tiled(A, B, s, buf, sistolico=True)[0] == ref
+                c_blk = matmul_tiled(A, B, s, buf, sistolico=False)[0]
+                c_sis, est = matmul_tiled(A, B, s, buf, sistolico=True)
+                ok = (c_blk == ref) and (c_sis == ref)
+                if not ok:
+                    falhas += 1
+                maior = max(abs(v) for linha in ref for v in linha)
+                print(f'{s:>2} {f"{m}x{k}x{n}":>11} {buf:>4} {est["blocos_C"]:>9} '
+                      f'{est["blocos_K"]:>9} {est["ciclos_malha"]:>12} {maior:>10}   '
+                      f'{"OK" if ok else "ERRO"}')
                 casos += 1
     # pior caso de magnitude: todos -128 -> produtos +16384, sem overflow para K=64
     A = [[-128] * 64 for _ in range(8)]
     B = [[-128] * 8 for _ in range(64)]
-    assert matmul_tiled(A, B, 8, 16)[0][0][0] == 64 * 16384
+    v = matmul_tiled(A, B, 8, 16)[0][0][0]
+    ok = v == 64 * 16384
+    falhas += 0 if ok else 1
     casos += 1
-    print(f'selftest OK: {casos} casos (S = 2, 4 e 8), os três modelos concordam')
+    print('-' * 80)
+    print(f'pior caso (todos -128, K=64): C = {v} = 64 x 16384   {"OK" if ok else "ERRO"}')
+    print(f'{casos} casos, {falhas} falha(s): referência direta, modelo em blocos e '
+          f'malha ciclo a ciclo {"concordam" if falhas == 0 else "DIVERGEM"}')
+
+
+def demo():
+    """Exemplo pequeno, passo a passo: M=N=K=4, malha 2x2, BUF_DEPTH=2."""
+    s, buf = 2, 2
+    A = [[1, 2, 3, 4], [5, 6, 7, 8], [-1, -2, -3, -4], [2, 0, -2, 1]]
+    B = [[1, 0, 2, -1], [0, 1, 1, 2], [3, -1, 0, 1], [1, 2, -2, 0]]
+    print('=== Matrizes de entrada (int8) ===')
+    print('A (4x4):'); print(fmt_mat(A, 4))
+    print('B (4x4):'); print(fmt_mat(B, 4))
+
+    print(f'\n=== Tiling: malha {s}x{s}, BUF_DEPTH={buf} (ordem em que o DMA trabalha) ===')
+    trace = []
+    C, est = matmul_tiled(A, B, s, buf, log=print, trace_primeiro=trace)
+
+    print('\n=== Malha 2x2 ciclo a ciclo: 1a passagem do bloco C[0:2, 0:2] ===')
+    print('Buffer A = A[0:2, 0:2] = [[1, 2], [5, 6]]   Buffer B = B[0:2, 0:2] = [[1, 0], [0, 1]]')
+    print('A entra pela esquerda (linha i atrasada i ciclos), B por cima (coluna j atrasada j ciclos)')
+    for st in trace:
+        print(f"\nciclo {st['t']}:  entra A = {st['a_in']}   entra B = {st['b_in']}")
+        for i in range(s):
+            celulas = '   '.join(f"MAC({i},{j}): {st['a'][i][j]:>2} x {st['b'][i][j]:>2}  acc = {st['acc'][i][j]:>3}"
+                                 for j in range(s))
+            print('   ' + celulas)
+
+    print('\n=== Resultado ===')
+    print('C (int32):'); print(fmt_mat(C, 5))
+    ref = matmul_ref(A, B)
+    print(f'referência direta: {"IGUAL" if C == ref else "DIFERENTE"}   '
+          f'({est["blocos_C"]} blocos de C, {est["blocos_K"]} passagens, '
+          f'{est["ciclos_malha"]} ciclos na malha)')
 
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__.split('\n')[1])
     p.add_argument('--selftest', action='store_true')
+    p.add_argument('--demo', action='store_true', help='exemplo pequeno passo a passo')
     p.add_argument('--m', type=int, default=16)
     p.add_argument('--n', type=int, default=16)
     p.add_argument('--k', type=int, default=16)
@@ -239,5 +313,9 @@ if __name__ == '__main__':
     a = p.parse_args()
     if a.selftest:
         selftest()
-    else:
+    if a.selftest and a.demo:
+        print()
+    if a.demo:
+        demo()
+    if not (a.selftest or a.demo):
         gera_vetores(a.m, a.n, a.k, a.s, a.buf, a.seed, a.out)
