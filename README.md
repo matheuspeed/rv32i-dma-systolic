@@ -11,7 +11,7 @@ Ferramentas: Cadence Xcelium (simulação), SimVision (formas de onda) e Genus (
 ## Estrutura
 
 ```
-docs/      especificação, mapa de memória, figuras, relatório e slides
+docs/      especificação (especificacao.md), figuras, relatório e slides
 rtl/       hardware
   include/   parâmetros e defines compartilhados
   cpu/       processador RV32I single-cycle
@@ -30,6 +30,25 @@ verif/     verificação
 sim/       Makefile, listas de arquivos e scripts de simulação
 syn/       scripts, constraints e relatórios de síntese (um diretório por configuração)
 ```
+
+## Especificação
+
+A especificação completa — decisões de projeto, mapa de memória, registradores, sinais de
+interface, protocolo de operação e tiling — está em
+**[`docs/especificacao.md`](docs/especificacao.md)**.
+
+![Diagrama de blocos](docs/figures/diagrama_blocos.png)
+
+Em resumo: a CPU configura os registradores do DMA e dá a partida; o DMA lê A e B da memória
+compartilhada (dual-port), alimenta a malha sistólica bloco a bloco e grava C de volta; o fim
+é sinalizado pelo bit DONE do registrador STATUS e pelo pino `irq`.
+
+| Item | Escolha |
+|---|---|
+| Dados | A e B em int8, acumulador e C em int32 |
+| Malha | `ARRAY_SIZE × ARRAY_SIZE` MACs, *output-stationary* (2×2, 4×4 e 8×8) |
+| Memória | 4 KB dual-port: porta A para a CPU, porta B para o DMA |
+| Registradores | base `0x0001_0000` (CTRL, STATUS, ADDR_A/B/C, DIM_M/N/K, CYCLES, INFO) |
 
 ## Como simular
 
@@ -121,7 +140,7 @@ na mesma pasta do `.asm`.
 | Entrega | Prazo | Conteúdo | Status |
 |---|---|---|---|
 | Trabalho prático: processador RISC-V | 01/11/2026 | CPU RV32I single-cycle, testbench, programa de teste, relatório | ✅ RTL e testes |
-| Parcial 1 | 01/11/2026 | Repositório, diagrama de blocos, mapa de memória, interfaces, golden model | ✅ repositório e golden model · ⏳ especificação |
+| Parcial 1 | 01/11/2026 | Repositório, diagrama de blocos, mapa de memória, interfaces, golden model | ✅ |
 | Parcial 2 | 14/11/2026 | RTL do MAC e da malha sistólica + testbench unitário (2×2 e 4×4) | ⏳ |
 | Parcial 3 | 22/11/2026 | RTL do DMA e da memória compartilhada + testbench sem CPU | ⏳ |
 | Parcial 4 | 13/12/2026 | Top-level, firmware e verificação UVM | ⏳ |
