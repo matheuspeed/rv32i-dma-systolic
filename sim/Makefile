@@ -4,6 +4,7 @@
 #    make cpu          processador RV32I (testbench unitário, modo texto)
 #    make cpu-waves    idem, gravando formas de onda e abrindo o SimVision
 #    make clean        apaga os arquivos gerados pelo simulador
+#    make accel        malha sistólica 2×2 e 4×4
 #
 #  Simulador padrão: Xcelium (xrun). Para usar o Icarus Verilog:
 #    make cpu SIM=iverilog
@@ -14,7 +15,9 @@ XRUN_OPTS  = -timescale 1ns/1ps -access +rwc
 
 CPU_HEX    = ../sw/cpu_tests/imem.hex
 
-.PHONY: cpu cpu-waves clean
+VEC_ROOT   = ../verif/unit/accel/vec_
+
+.PHONY: cpu cpu-waves clean accel accel-2 accel-4 accel-waves
 
 # a imem lê "imem.hex" da pasta onde a simulação roda
 imem.hex: $(CPU_HEX)
@@ -34,3 +37,22 @@ cpu-waves: imem.hex
 
 clean:
 	rm -rf xcelium.d waves.shm .simvision *.log *.history *.key *.vvp imem.hex
+
+accel: accel-2 accel-4
+
+accel-2 accel-4: accel-%:
+ifeq ($(SIM),iverilog)
+	iverilog -g2005 -o accel_$*.vvp -c filelists/accel.f \
+	  -P tb_systolic.ARRAY_SIZE=$* -P 'tb_systolic.VEC_DIR="$(VEC_ROOT)$*x$*"'
+	vvp -n accel_$*.vvp | tee accel_$*.log
+else
+	xrun $(XRUN_OPTS) -f filelists/accel.f -top tb_systolic -l accel_$*.log \
+	  -defparam tb_systolic.ARRAY_SIZE=$* -defparam 'tb_systolic.VEC_DIR="$(VEC_ROOT)$*x$*"'
+endif
+
+accel-waves:
+	xrun $(XRUN_OPTS) -f filelists/accel.f -top tb_systolic -l accel_2.log \
+	  -defparam tb_systolic.ARRAY_SIZE=2 -defparam 'tb_systolic.VEC_DIR="$(VEC_ROOT)2x2"' \
+	  -input probe.tcl
+	simvision waves.shm &
+

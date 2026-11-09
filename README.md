@@ -37,6 +37,9 @@ A especificação completa — decisões de projeto, mapa de memória, registrad
 interface, protocolo de operação e tiling — está em
 **[`docs/especificacao.md`](docs/especificacao.md)**.
 
+A implementação dos módulos do acelerador (MAC, skew e malha sistólica) está em
+**[`docs/acelerador.md`](docs/acelerador.md)**.
+
 ![Diagrama de blocos](docs/figures/diagrama_blocos.png)
 
 Em resumo: a CPU configura os registradores do DMA e dá a partida; o DMA lê A e B da memória
@@ -58,7 +61,16 @@ Todos os comandos rodam de dentro de `sim/`:
 cd sim
 make cpu          # processador RV32I: testbench auto-verificável (PASSOU/FALHOU)
 make cpu-waves    # idem, gravando as formas de onda e abrindo o SimVision
+make accel        # malha sistólica 2×2 e 4×4: testbench auto-verificável
+make accel-waves  # malha 2×2, gravando as formas de onda e abrindo o SimVision
 make clean
+```
+
+O `make accel` faz 3 verificações: K inteiro, K dividido em 2 partes e acumuladores zerados. Os vetores utilizados na comparação foram gerados pelo modelo de referência com os seguintes comandos:
+
+```
+python model/matmul_tiled.py --m 2 --n 2 --k 8 --s 2 --seed 1 --out verif/unit/accel/vec_2x2
+python model/matmul_tiled.py --m 4 --n 4 --k 8 --s 4 --seed 1 --out verif/unit/accel/vec_4x4
 ```
 
 ## Modelo de referência (golden model)
@@ -141,7 +153,7 @@ na mesma pasta do `.asm`.
 |---|---|---|---|
 | Trabalho prático: processador RISC-V | 01/11/2026 | CPU RV32I single-cycle, testbench, programa de teste, relatório | ✅ RTL e testes |
 | Parcial 1 | 01/11/2026 | Repositório, diagrama de blocos, mapa de memória, interfaces, golden model | ✅ |
-| Parcial 2 | 14/11/2026 | RTL do MAC e da malha sistólica + testbench unitário (2×2 e 4×4) | ⏳ |
+| Parcial 2 | 14/11/2026 | RTL do MAC e da malha sistólica + testbench unitário (2×2 e 4×4) | ✅ |
 | Parcial 3 | 22/11/2026 | RTL do DMA e da memória compartilhada + testbench sem CPU | ⏳ |
 | Parcial 4 | 13/12/2026 | Top-level, firmware e verificação UVM | ⏳ |
 | Final | 18–19/12/2026 | Síntese de 3 configurações, relatório técnico e apresentação | ⏳ |

@@ -159,3 +159,4 @@ Decisões de Projeto:
 | 4 x 4 | 16 | 352 |
 | 8 x 8 | 4 | 120 |
 
+Detalhes de implementação da malha (MAC, skew e malha sistólica): [`acelerador.md`](acelerador.md).
