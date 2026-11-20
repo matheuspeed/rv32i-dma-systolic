@@ -40,6 +40,9 @@ interface, protocolo de operação e tiling — está em
 A implementação dos módulos do acelerador (MAC, skew e malha sistólica) está em
 **[`docs/acelerador.md`](docs/acelerador.md)**.
 
+A implementação do DMA, da memória compartilhada e do wrapper do acelerador (buffers e
+controle da malha) está em **[`docs/dma.md`](docs/dma.md)**.
+
 ![Diagrama de blocos](docs/figures/diagrama_blocos.png)
 
 Em resumo: a CPU configura os registradores do DMA e dá a partida; o DMA lê A e B da memória
@@ -63,6 +66,9 @@ make cpu          # processador RV32I: testbench auto-verificável (PASSOU/FALHO
 make cpu-waves    # idem, gravando as formas de onda e abrindo o SimVision
 make accel        # malha sistólica 2×2 e 4×4: testbench auto-verificável
 make accel-waves  # malha 2×2, gravando as formas de onda e abrindo o SimVision
+make mem          # memória de dados dual-port
+make accel-top    # wrapper do acelerador (buffers + controle) 2×2 e 4×4
+make dma          # DMA + memória + acelerador sem CPU (3 configurações)
 make clean
 ```
 
@@ -72,6 +78,17 @@ O `make accel` faz 3 verificações: K inteiro, K dividido em 2 partes e acumula
 python model/matmul_tiled.py --m 2 --n 2 --k 8 --s 2 --seed 1 --out verif/unit/accel/vec_2x2
 python model/matmul_tiled.py --m 4 --n 4 --k 8 --s 4 --seed 1 --out verif/unit/accel/vec_4x4
 ```
+
+O `make dma` executa o testbench do DMA (o testbench faz o papel da CPU, configurando os
+registradores) em três configurações e compara a memória inteira com o golden model:
+
+| Alvo | M × N × K | ARRAY_SIZE | O que exercita |
+|---|---|---|---|
+| `make dma-basic` | 2 × 2 × 8 | 2 | um bloco, uma passagem |
+| `make dma-tiled` | 4 × 4 × 24 | 2 | tiling em M, N e K (4 blocos × 2 pedaços de K) |
+| `make dma-tiled-s4` | 8 × 8 × 24 | 4 | o mesmo, com malha 4×4 |
+
+Detalhes e resultados em [`docs/dma.md`](docs/dma.md#verificação).
 
 ## Modelo de referência (golden model)
 
@@ -154,7 +171,7 @@ na mesma pasta do `.asm`.
 | Trabalho prático: processador RISC-V | 01/11/2026 | CPU RV32I single-cycle, testbench, programa de teste, relatório | ✅ RTL e testes |
 | Parcial 1 | 01/11/2026 | Repositório, diagrama de blocos, mapa de memória, interfaces, golden model | ✅ |
 | Parcial 2 | 14/11/2026 | RTL do MAC e da malha sistólica + testbench unitário (2×2 e 4×4) | ✅ |
-| Parcial 3 | 22/11/2026 | RTL do DMA e da memória compartilhada + testbench sem CPU | ⏳ |
+| Parcial 3 | 22/11/2026 | RTL do DMA e da memória compartilhada + testbench sem CPU | ✅ |
 | Parcial 4 | 13/12/2026 | Top-level, firmware e verificação UVM | ⏳ |
 | Final | 18–19/12/2026 | Síntese de 3 configurações, relatório técnico e apresentação | ⏳ |
 

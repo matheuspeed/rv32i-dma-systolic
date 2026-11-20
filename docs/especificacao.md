@@ -77,6 +77,15 @@ L = leitura, E = escrita, E1C = escrever 1 para limpar. Acesso somente por palav
 | `dbus_mode` | saída | 3 | Largura/sinal do acesso (byte, meia palavra, palavra) |
 | `dbus_rdata` | entrada | 32 | Dado lido (da memória ou dos registradores) |
 
+**Decodificador → registradores do DMA**
+
+| Sinal | Direção (DMA) | Largura | Descrição |
+|---|---|---|---|
+| `reg_addr` | entrada | 8 | Offset do registrador dentro de `0x0001_0000` (`dbus_addr[7:0]`) |
+| `reg_wdata` | entrada | 32 | Dado de escrita (`dbus_wdata`) |
+| `reg_we` | entrada | 1 | Habilita escrita (`dbus_we & dbus_addr[16]`) |
+| `reg_rdata` | saída | 32 | Dado lido (combinacional), enviado à CPU quando `dbus_addr[16] = 1` |
+
 **DMA ↔ memória compartilhada (porta B)**
 
 | Sinal | Direção (DMA) | Largura | Descrição |
@@ -160,3 +169,5 @@ Decisões de Projeto:
 | 8 x 8 | 4 | 120 |
 
 Detalhes de implementação da malha (MAC, skew e malha sistólica): [`acelerador.md`](acelerador.md).
+
+Detalhes de implementação do DMA, da memória dual-port e do wrapper do acelerador: [`dma.md`](dma.md).
