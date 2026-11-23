@@ -11,6 +11,13 @@ module tb_riscv;
     wire [31:0] reg_write_data;
     wire [31:0] mem_write_data;
 
+    // Barramento de dados entre a CPU e a memória
+    wire [31:0] dbus_addr;
+    wire [31:0] dbus_wdata;
+    wire [31:0] dbus_rdata;
+    wire        dbus_we;
+    wire [2:0]  dbus_mode;
+
     integer erros;
     integer ciclos;
 
@@ -18,11 +25,27 @@ module tb_riscv;
     riscv_top uut (
         .clk(clk),
         .rst(rst),
+        .dbus_addr(dbus_addr),
+        .dbus_wdata(dbus_wdata),
+        .dbus_we(dbus_we),
+        .dbus_mode(dbus_mode),
+        .dbus_rdata(dbus_rdata),
         .pc_out(pc),
         .instr_out(instr),
         .alu_result_out(alu_result),
         .reg_write_data_out(reg_write_data),
         .mem_write_data_out(mem_write_data)
+    );
+
+    // Memória de dados (fora do riscv_top desde a integração do soc_top)
+    dmem dmem_inst (
+        .clk(clk),
+        .reset(rst),
+        .a(dbus_addr),
+        .rd(dbus_rdata),
+        .wd(dbus_wdata),
+        .we(dbus_we),
+        .mode(dbus_mode)
     );
 
     // Geração do Sinal de Clock (Período = 10ns -> 100MHz)
@@ -48,8 +71,8 @@ module tb_riscv;
         input [31:0] esperado;
         reg   [31:0] lido;
         begin
-            lido = {uut.dmem_inst.mem[a+3], uut.dmem_inst.mem[a+2],
-                    uut.dmem_inst.mem[a+1], uut.dmem_inst.mem[a]};
+            lido = {dmem_inst.mem[a+3], dmem_inst.mem[a+2],
+                    dmem_inst.mem[a+1], dmem_inst.mem[a]};
             if (lido === esperado)
                 $display("  MEM[%03h] = %08h   OK", a, lido);
             else begin

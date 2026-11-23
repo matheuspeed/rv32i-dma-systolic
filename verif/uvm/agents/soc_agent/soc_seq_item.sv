@@ -35,10 +35,12 @@ class soc_seq_item extends uvm_sequence_item;
         B.size() == K * N;
     }
 
-    // Favorece fronteiras (-128, 0, 127) para COV-04
+    // Favorece fronteiras (-128, 0, 127) para COV-04: ~10% cada.
+    // ':/' divide o peso 70 entre os 254 valores do meio; com ':=' cada um
+    // receberia peso 70 e os extremos praticamente nunca seriam sorteados.
     constraint c_data_dist {
-        foreach (A[i]) A[i] dist { -128 := 10, 0 := 10, 127 := 10, [-127:126] := 70 };
-        foreach (B[i]) B[i] dist { -128 := 10, 0 := 10, 127 := 10, [-127:126] := 70 };
+        foreach (A[i]) A[i] dist { -128 := 10, 0 := 10, 127 := 10, [-127:126] :/ 70 };
+        foreach (B[i]) B[i] dist { -128 := 10, 0 := 10, 127 := 10, [-127:126] :/ 70 };
     }
 
     `uvm_object_utils_begin(soc_seq_item)

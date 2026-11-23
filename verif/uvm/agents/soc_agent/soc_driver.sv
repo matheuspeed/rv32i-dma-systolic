@@ -32,9 +32,11 @@ class soc_driver extends uvm_driver #(soc_seq_item);
         cfg.vif.rst <= 1'b1;
         @(negedge cfg.vif.clk);
 
-        // Limpa região de saída C para evitar falsos positivos de execuções anteriores
+        // Preenche a região de saída C com um marcador para evitar falsos positivos:
+        // se o DMA não gravar algum elemento, o marcador aparece no scoreboard
+        // (com 0, um teste de matriz zero passaria mesmo sem nenhuma escrita).
         for (int idx = 0; idx < (req.M * req.N); idx++)
-            cfg.vif.write_dmem_word(req.addr_c + (idx * 4), 32'h0);
+            cfg.vif.write_dmem_word(req.addr_c + (idx * 4), 32'hDEADBEEF);
 
         // Escreve tabela de descritores em 0x000..0x018
         cfg.vif.write_dmem_word(12'h000, {20'b0, req.addr_a});

@@ -26,12 +26,6 @@ class soc_ref_model extends uvm_subscriber #(soc_seq_item);
             end
         end
 
-        // Mecanismo para demonstração ao vivo (Passo 6: injeção de erro)
-        if ($test$plusargs("ERR_INJECT") && (exp.C.size() > 0)) begin
-            `uvm_warning("REF_MOD", "Injetando falha proposital (+ERR_INJECT) em C[0][0]")
-            exp.C[0] = exp.C[0] + 32'sd1;
-        end
-
         exp_ap.write(exp);
     endfunction
 endclass

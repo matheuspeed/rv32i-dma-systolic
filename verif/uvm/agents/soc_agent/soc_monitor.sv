@@ -35,7 +35,17 @@ class soc_monitor extends uvm_monitor;
                     8'h00: begin
                         obs_irq_en = cfg.vif.dbus_wdata[1];
                         if (cfg.vif.dbus_wdata[0]) begin
-                            // CPU disparou CTRL.START = 1; mede latência até o término
+                            // CPU disparou CTRL.START = 1.
+                            // A e B são lidos AGORA, antes de o DMA trabalhar: se o DMA
+                            // escrevesse fora da região de C e corrompesse A ou B, o valor
+                            // esperado ainda seria calculado a partir das entradas originais.
+                            tr = soc_seq_item::type_id::create("tr");
+                            tr.A = new[obs_m * obs_k];
+                            tr.B = new[obs_k * obs_n];
+                            foreach (tr.A[i]) tr.A[i] = signed'(cfg.vif.read_dmem_byte(obs_addr_a + i[11:0]));
+                            foreach (tr.B[i]) tr.B[i] = signed'(cfg.vif.read_dmem_byte(obs_addr_b + i[11:0]));
+
+                            // mede latência até o término
                             cyc = 0;
                             while (cyc < cfg.timeout_cycles) begin
                                 @(posedge cfg.vif.clk);
@@ -47,7 +57,6 @@ class soc_monitor extends uvm_monitor;
                                     break;
                             end
 
-                            tr = soc_seq_item::type_id::create("tr");
                             tr.M              = obs_m;
                             tr.N              = obs_n;
                             tr.K              = obs_k;
@@ -58,12 +67,7 @@ class soc_monitor extends uvm_monitor;
                             tr.latency_cycles = cyc;
                             tr.array_size_cfg = cfg.array_size;
 
-                            tr.A = new[obs_m * obs_k];
-                            tr.B = new[obs_k * obs_n];
                             tr.C = new[obs_m * obs_n];
-
-                            foreach (tr.A[i]) tr.A[i] = signed'(cfg.vif.read_dmem_byte(obs_addr_a + i[11:0]));
-                            foreach (tr.B[i]) tr.B[i] = signed'(cfg.vif.read_dmem_byte(obs_addr_b + i[11:0]));
                             foreach (tr.C[i]) tr.C[i] = signed'(cfg.vif.read_dmem_word(obs_addr_c + (i[11:0] * 4)));
 
                             `uvm_info("MON", $sformatf("Operacao concluida: %s", tr.convert2string()), UVM_MEDIUM)

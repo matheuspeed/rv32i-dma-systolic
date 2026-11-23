@@ -240,7 +240,13 @@ module dma #(
                 c_sel = r*ARRAY_SIZE + c;
                 memb_addr = c_byte[11:2];
                 memb_we = 1;
+`ifdef INJECT_BUG
+                // Falha proposital para a demonstração (ativada com +define+INJECT_BUG):
+                // o primeiro elemento de cada bloco de C é gravado com +1.
+                memb_wdata = (r == 0 && c == 0) ? c_data + 1 : c_data;
+`else
                 memb_wdata = c_data;
+`endif
             end
             default: ;
         endcase

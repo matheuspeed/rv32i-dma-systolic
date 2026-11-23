@@ -43,7 +43,7 @@ cpu-waves: imem.hex
 	simvision waves.shm &
 
 clean:
-	rm -rf xcelium.d waves.shm .simvision *.log *.history *.key *.vvp imem.hex
+	rm -rf xcelium.d waves.shm .simvision cov_work *.log *.history *.key *.vvp imem.hex
 
 accel: accel-2 accel-4
 
@@ -103,6 +103,13 @@ dma-tiled-s4:
 ARRAY_SIZE ?= 4
 UVM_TEST   ?= soc_directed_test
 SEED       ?= 1
+REGRESS_SEEDS ?= 1 7 42 123 2026
+COV        ?= 1
+ifeq ($(COV),1)
+COV_OPTS    = -coverage all -covoverwrite -covtest $(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED)
+else
+COV_OPTS    =
+endif
 FW_HEX      = ../sw/firmware/firmware.hex
 
 .PHONY: uvm uvm-waves uvm-err uvm-regress
@@ -111,30 +118,33 @@ fw-imem: $(FW_HEX)
 	cp $(FW_HEX) imem.hex
 
 uvm: fw-imem
-	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) \
-	  -coverage all -covoverwrite -covtest $(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED) \
+	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) -nowarn CUVIHR \
+	  $(COV_OPTS) \
 	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
 	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) \
 	  -l uvm_$(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED).log
+	@echo "=== Resultado ==="
+	@grep -E "coverage \[COV\]|TEST (PASS|FAIL)|UVM_(ERROR|FATAL)=" uvm_$(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED).log
 
 uvm-waves: fw-imem
-	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) \
+	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) -nowarn CUVIHR \
 	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
 	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) \
 	  -input probe.tcl -l uvm_waves.log
 	simvision waves.shm &
 
 uvm-err: fw-imem
-	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) \
+	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) -nowarn CUVIHR \
 	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
 	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=soc_directed_test \
-	  +ERR_INJECT -l uvm_err.log
+	  +define+INJECT_BUG -l uvm_err.log
 
 uvm-regress:
-	$(MAKE) uvm ARRAY_SIZE=2 UVM_TEST=soc_directed_test SEED=1
-	$(MAKE) uvm ARRAY_SIZE=4 UVM_TEST=soc_directed_test SEED=1
-	$(MAKE) uvm ARRAY_SIZE=8 UVM_TEST=soc_directed_test SEED=1
-	$(MAKE) uvm ARRAY_SIZE=2 UVM_TEST=soc_random_test   SEED=42
-	$(MAKE) uvm ARRAY_SIZE=4 UVM_TEST=soc_random_test   SEED=42
-	$(MAKE) uvm ARRAY_SIZE=8 UVM_TEST=soc_random_test   SEED=42	  
-
+	for s in 2 4 8; do \
+	  $(MAKE) uvm ARRAY_SIZE=$$s UVM_TEST=soc_directed_test SEED=1; \
+	done
+	for s in 2 4 8; do for seed in $(REGRESS_SEEDS); do \
+	  $(MAKE) uvm ARRAY_SIZE=$$s UVM_TEST=soc_random_test SEED=$$seed; \
+	done; done
+	@echo "=== Resumo da regressao ===" | tee regress_summary.log
+	@grep -H -E "TEST (PASS|FAIL)|Cobertura funcional" uvm_soc_*_seed*.log | tee -a regress_summary.log

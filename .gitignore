@@ -11,6 +11,7 @@ waves.*
 # Icarus Verilog
 *.vvp
 *.vcd
+cov_work/
 
 # Cópia do programa feita pelo Makefile na pasta de simulação
 sim/imem.hex
