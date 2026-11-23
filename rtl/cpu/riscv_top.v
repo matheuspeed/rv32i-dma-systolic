@@ -1,7 +1,15 @@
+// rtl/cpu/riscv_top.v
 module riscv_top (
-    input wire clk,
-    input wire rst,
-    
+    input  wire        clk,
+    input  wire        rst,
+
+    // Barramento de dados externo (para DMEM dual-port e MMIO do DMA)
+    output wire [31:0] dbus_addr,
+    output wire [31:0] dbus_wdata,
+    output wire        dbus_we,
+    output wire [2:0]  dbus_mode,
+    input  wire [31:0] dbus_rdata,
+
     // Sinais para observabilidade durante simulação e testes
     output wire [31:0] pc_out,
     output wire [31:0] instr_out,
@@ -16,7 +24,6 @@ module riscv_top (
     // Fios dos registradores e extensores
     wire [31:0] rdout1, rdout2, ext_imm;
     wire [31:0] alu_in_a, alu_in_b, alu_result;
-    wire [31:0] mem_rd;
     wire [31:0] reg_wr_data;
 
     // Sinais de controle
@@ -41,14 +48,19 @@ module riscv_top (
         end
     end
 
+    // Ligação ao barramento externo de dados
+    assign dbus_addr  = alu_result;
+    assign dbus_wdata = rdout2;
+    assign dbus_we    = memWE;
+    assign dbus_mode  = memMode;
+
     // Saídas de monitoramento
-    assign pc_out = pc_curr;
-    assign instr_out = instr;
-    assign alu_result_out = alu_result;
+    assign pc_out             = pc_curr;
+    assign instr_out          = instr;
+    assign alu_result_out     = alu_result;
     assign reg_write_data_out = reg_wr_data;
     assign mem_write_data_out = rdout2;
 
-    // Instanciação do PC
     pc pc_inst (
         .clk(clk),
         .rst(rst),
@@ -56,37 +68,32 @@ module riscv_top (
         .o(pc_curr)
     );
 
-    // Somador PC + 4
     adder adder_pc4 (
         .a(pc_curr),
         .b(32'd4),
         .o(pc_plus_4)
     );
 
-    // Somador PC + ExtImm (Desvios/Saltos)
     adder adder_pctarget (
         .a(pc_curr),
         .b(ext_imm),
         .o(pc_target)
     );
 
-    // Mux do Próximo PC (PCSel)
     mux4 mux_pc (
         .s(PCSel),
         .a(pc_plus_4),
-        .b(alu_result), // JALR
-        .c(pc_target),   // Branch/JAL
+        .b(alu_result),
+        .c(pc_target),
         .d(32'b0),
         .o(pc_next)
     );
 
-    // Memória de Instruções
     imem imem_inst (
         .addr(pc_curr),
         .inst(instr)
     );
 
-    // Unidade de Controle
     control control_inst (
         .instr(instr),
         .branch_taken(branch_taken),
@@ -100,7 +107,6 @@ module riscv_top (
         .memMode(memMode)
     );
 
-    // Banco de Registradores
     regfile regfile_inst (
         .clk(clk),
         .rst(rst),
@@ -113,13 +119,11 @@ module riscv_top (
         .rs2_o(rdout2)
     );
 
-    // Extensor de Imediato
     extendImm extend_inst (
         .Instr(instr),
         .ExtImm(ext_imm)
     );
 
-    // Multiplexadores da ULA
     mux2 mux_rs1 (
         .s(rs1Sel),
         .a(pc_curr),
@@ -134,7 +138,6 @@ module riscv_top (
         .o(alu_in_b)
     );
 
-    // Unidade Lógica Aritmética (ULA)
     ALU alu_inst (
         .a(alu_in_a),
         .b(alu_in_b),
@@ -142,21 +145,9 @@ module riscv_top (
         .result(alu_result)
     );
 
-    // Memória de Dados
-    dmem dmem_inst (
-        .clk(clk),
-        .reset(rst),
-        .a(alu_result),
-        .rd(mem_rd),
-        .wd(rdout2),
-        .we(memWE),
-        .mode(memMode)
-    );
-
-    // Multiplexador de Escrita no Registrador (RegSel)
     mux4 mux_reg_write (
         .s(RegSel),
-        .a(mem_rd),
+        .a(dbus_rdata),
         .b(alu_result),
         .c(ext_imm),
         .d(pc_plus_4),

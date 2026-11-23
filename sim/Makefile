@@ -100,3 +100,41 @@ dma-tiled-s4:
 	  -defparam tb_dma.M=8 -defparam tb_dma.N=8 -defparam tb_dma.K=24 \
 	  -defparam 'tb_dma.VEC_DIR="$(DMA_VEC)/vec_dma_tiled_s4"'
 
+ARRAY_SIZE ?= 4
+UVM_TEST   ?= soc_directed_test
+SEED       ?= 1
+FW_HEX      = ../sw/firmware/firmware.hex
+
+.PHONY: uvm uvm-waves uvm-err uvm-regress
+
+fw-imem: $(FW_HEX)
+	cp $(FW_HEX) imem.hex
+
+uvm: fw-imem
+	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) \
+	  -coverage all -covoverwrite -covtest $(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED) \
+	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
+	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) \
+	  -l uvm_$(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED).log
+
+uvm-waves: fw-imem
+	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) \
+	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
+	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) \
+	  -input probe.tcl -l uvm_waves.log
+	simvision waves.shm &
+
+uvm-err: fw-imem
+	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) \
+	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
+	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=soc_directed_test \
+	  +ERR_INJECT -l uvm_err.log
+
+uvm-regress:
+	$(MAKE) uvm ARRAY_SIZE=2 UVM_TEST=soc_directed_test SEED=1
+	$(MAKE) uvm ARRAY_SIZE=4 UVM_TEST=soc_directed_test SEED=1
+	$(MAKE) uvm ARRAY_SIZE=8 UVM_TEST=soc_directed_test SEED=1
+	$(MAKE) uvm ARRAY_SIZE=2 UVM_TEST=soc_random_test   SEED=42
+	$(MAKE) uvm ARRAY_SIZE=4 UVM_TEST=soc_random_test   SEED=42
+	$(MAKE) uvm ARRAY_SIZE=8 UVM_TEST=soc_random_test   SEED=42	  
+
