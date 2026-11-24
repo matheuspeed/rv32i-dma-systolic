@@ -10,6 +10,8 @@ module top_tb;
     `endif
 
     localparam int ARRAY_SIZE = `ARRAY_SIZE;
+    localparam int DATA_W     = 8;    // elementos de A e B (int8)
+    localparam int ACC_W      = 32;   // acumuladores e elementos de C (int32)
 
     logic clk;
     initial begin
@@ -23,6 +25,8 @@ module top_tb;
 
     soc_top #(
         .ARRAY_SIZE (ARRAY_SIZE),
+        .DATA_W     (DATA_W),
+        .ACC_W      (ACC_W),
         .BUF_DEPTH  (16)
     ) dut (
         .clk                (clk),
@@ -43,6 +47,12 @@ module top_tb;
     assign vif.acc_start  = dut.acc_start;
     assign vif.acc_busy   = dut.acc_busy;
     assign vif.acc_done   = dut.acc_done;
+
+    // Cópias com sinal, só para visualização no SimVision (os fios do RTL são
+    // declarados sem sinal, e o SimVision mostraria -1 como 4294967295).
+    wire signed [DATA_W-1:0] dbg_buf_wdata  = dut.buf_wdata;
+    wire signed [ACC_W-1:0]  dbg_c_data     = dut.c_data;
+    wire signed [ACC_W-1:0]  dbg_memb_wdata = dut.memb_wdata;
 
     initial begin
         uvm_config_db#(virtual soc_if)::set(null, "uvm_test_top", "vif", vif);

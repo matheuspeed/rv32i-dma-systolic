@@ -112,7 +112,7 @@ COV_OPTS    =
 endif
 FW_HEX      = ../sw/firmware/firmware.hex
 
-.PHONY: uvm uvm-waves uvm-err uvm-regress cov-merge
+.PHONY: uvm uvm-waves waves uvm-err uvm-regress cov-merge
 
 fw-imem: $(FW_HEX)
 	cp $(FW_HEX) imem.hex
@@ -131,7 +131,10 @@ uvm-waves: fw-imem
 	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
 	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) \
 	  -input probe.tcl -l uvm_waves.log
-	simvision waves.shm &
+	simvision -input waves_demo.svcf waves.shm &
+
+waves:
+	simvision -input waves_demo.svcf waves.shm &
 
 uvm-err: fw-imem
 	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) -nowarn CUVIHR \

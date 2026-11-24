@@ -1,0 +1,103 @@
+# Configuração do SimVision para a demonstração (passo 5 do roteiro).
+# Uso: make uvm-waves  (simula e abre já com esta configuração)
+#      make waves      (reabre um waves.shm existente, sem simular de novo)
+# Visão da demo: poucos sinais por etapa (1 a 5). Os grupos "Detalhe", no fim,
+# trazem os demais sinais e abrem fechados (clique no + para expandir).
+
+if {[catch {database require waves -search {./waves.shm}} err]} {
+    puts "Nao encontrei waves.shm: rode make uvm-waves antes."
+}
+
+# Nomes dos estados das FSMs (se o mapa falhar, o valor aparece em decimal)
+catch {
+mmap new -reuse -name {dma_state} -radix %d -contents {
+    {%d=0 -label IDLE      -linecolor gray   -shape bus}
+    {%d=1 -label LD_A_REQ  -linecolor green  -shape bus}
+    {%d=2 -label LD_A_WR   -linecolor green  -shape bus}
+    {%d=3 -label LD_B_REQ  -linecolor green  -shape bus}
+    {%d=4 -label LD_B_WR   -linecolor green  -shape bus}
+    {%d=5 -label RUN_START -linecolor purple -shape bus}
+    {%d=6 -label RUN_WAIT  -linecolor purple -shape bus}
+    {%d=7 -label ST_C      -linecolor yellow -shape bus}
+    {%d=8 -label FINISH    -linecolor red    -shape bus}
+    {%d=* -label %d        -linecolor white  -shape bus}
+}
+mmap new -reuse -name {acc_state} -radix %d -contents {
+    {%d=0 -label IDLE  -linecolor gray   -shape bus}
+    {%d=1 -label CLEAR -linecolor purple -shape bus}
+    {%d=2 -label RUN   -linecolor purple -shape bus}
+    {%d=* -label %d    -linecolor white  -shape bus}
+}
+}
+
+proc demo_group {name sigs} {
+    group new -name $name -overlay 0
+    group using $name
+    group set -overlay 0
+    group set -comment {}
+    group clear 0 end
+    foreach s $sigs {
+        if {[catch {group insert [list waves::$s]} err]} {
+            puts "Sinal nao encontrado: $s"
+        }
+    }
+}
+
+set D top_tb.dut
+
+# ---------- visão da demo: um grupo por etapa da operação
+demo_group E1_CPU_configura_o_DMA [list \
+    $D.rst $D.dma_we $D.u_dma.dim_m $D.u_dma.dim_n $D.u_dma.dim_k $D.u_dma.start]
+demo_group E2_DMA_carrega_A_e_B [list \
+    $D.u_dma.state $D.memb_addr $D.buf_we $D.buf_sel]
+demo_group E3_Malha_calcula [list \
+    $D.acc_start $D.acc_busy $D.u_accel.t $D.acc_done]
+demo_group E4_DMA_grava_C [list \
+    $D.memb_we $D.c_sel top_tb.dbg_memb_wdata]
+demo_group E5_Termino [list \
+    $D.u_dma.done $D.u_dma.cycles $D.irq]
+
+# ---------- detalhes (abrem fechados)
+demo_group Detalhe_barramento_CPU [list \
+    $D.clk $D.dbus_addr $D.dbus_wdata $D.dbus_we $D.sel_dma $D.dbus_rdata \
+    $D.u_dma.addr_a $D.u_dma.addr_b $D.u_dma.addr_c $D.u_dma.irq_en]
+demo_group Detalhe_DMA [list \
+    $D.memb_rdata $D.u_dma.ti $D.u_dma.tj $D.u_dma.k0 \
+    $D.buf_bank $D.buf_addr top_tb.dbg_buf_wdata]
+demo_group Detalhe_acelerador [list \
+    $D.acc_clear $D.acc_klen $D.u_accel.state $D.u_accel.a_col $D.u_accel.b_row \
+    top_tb.dbg_c_data $D.memb_addr]
+
+window new WaveWindow -name {Demo UVM - soc_top}
+waveform using {Demo UVM - soc_top}
+
+# Radix por sinal (array: o Tcl do SimVision não tem dict)
+array set radix [list \
+    $D.u_dma.dim_m %d $D.u_dma.dim_n %d $D.u_dma.dim_k %d \
+    $D.u_dma.ti %d $D.u_dma.tj %d $D.u_dma.k0 %d $D.u_dma.cycles %d \
+    $D.acc_klen %d $D.buf_bank %d $D.buf_addr %d $D.c_sel %d $D.u_accel.t %d \
+    $D.u_dma.state dma_state $D.u_accel.state acc_state]
+# dados com sinal: cópias signed declaradas no top_tb (dbg_*), mostradas em %d
+array set radix [list top_tb.dbg_buf_wdata %d top_tb.dbg_c_data %d top_tb.dbg_memb_wdata %d]
+
+set nfmt 0
+foreach g {E1_CPU_configura_o_DMA E2_DMA_carrega_A_e_B E3_Malha_calcula E4_DMA_grava_C E5_Termino
+           Detalhe_barramento_CPU Detalhe_DMA Detalhe_acelerador} {
+    set gid [waveform add -groups $g]
+    foreach id [waveform hierarchy contents $gid] {
+        set path [join [waveform signals -format path $id]]
+        regsub {^.*::} $path {} path
+        regsub {\[[0-9:]+\]$} $path {} path
+        if {[info exists radix($path)]} {
+            if {[catch {waveform format $id -radix $radix($path)} err]} {
+                puts "Formato nao aplicado em $path: $err"
+            } else { incr nfmt }
+        }
+    }
+    if {[string match Detalhe_* $g]} { catch {waveform hierarchy collapse $gid} }
+}
+puts "Sinais formatados: $nfmt"
+
+# Zoom inicial na 1ª operação do teste dirigido (S = 4: termina perto de 1900 ns).
+# Para ver a simulação inteira, use "Zoom Full" na barra do SimVision.
+catch {waveform xview limits 0 2000ns}
