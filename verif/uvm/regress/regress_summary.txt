@@ -1,0 +1,37 @@
+=== Resumo da regressao ===
+uvm_soc_directed_test_s2_seed1.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 40545000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=70.83% | cg_data=100.00%
+uvm_soc_directed_test_s2_seed1.log: >>> TEST PASS <<<
+uvm_soc_directed_test_s4_seed1.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 24035000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=70.83% | cg_data=100.00%
+uvm_soc_directed_test_s4_seed1.log: >>> TEST PASS <<<
+uvm_soc_directed_test_s8_seed1.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 21165000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=52.78% | cg_data=100.00%
+uvm_soc_directed_test_s8_seed1.log: >>> TEST PASS <<<
+uvm_soc_random_test_s2_seed123.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 317555000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=81.94% | cg_data=100.00%
+uvm_soc_random_test_s2_seed123.log: >>> TEST PASS <<<
+uvm_soc_random_test_s2_seed1.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 349065000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=84.72% | cg_data=100.00%
+uvm_soc_random_test_s2_seed1.log: >>> TEST PASS <<<
+uvm_soc_random_test_s2_seed2026.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 404065000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=80.56% | cg_data=100.00%
+uvm_soc_random_test_s2_seed2026.log: >>> TEST PASS <<<
+uvm_soc_random_test_s2_seed42.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 415885000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=70.83% | cg_data=100.00%
+uvm_soc_random_test_s2_seed42.log: >>> TEST PASS <<<
+uvm_soc_random_test_s2_seed7.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 334465000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=86.11% | cg_data=100.00%
+uvm_soc_random_test_s2_seed7.log: >>> TEST PASS <<<
+uvm_soc_random_test_s4_seed123.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 425785000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=81.94% | cg_data=100.00%
+uvm_soc_random_test_s4_seed123.log: >>> TEST PASS <<<
+uvm_soc_random_test_s4_seed1.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 303995000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=84.72% | cg_data=100.00%
+uvm_soc_random_test_s4_seed1.log: >>> TEST PASS <<<
+uvm_soc_random_test_s4_seed2026.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 295315000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=81.94% | cg_data=100.00%
+uvm_soc_random_test_s4_seed2026.log: >>> TEST PASS <<<
+uvm_soc_random_test_s4_seed42.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 341845000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=81.94% | cg_data=100.00%
+uvm_soc_random_test_s4_seed42.log: >>> TEST PASS <<<
+uvm_soc_random_test_s4_seed7.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 249185000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=84.72% | cg_data=100.00%
+uvm_soc_random_test_s4_seed7.log: >>> TEST PASS <<<
+uvm_soc_random_test_s8_seed123.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 297945000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=84.72% | cg_data=100.00%
+uvm_soc_random_test_s8_seed123.log: >>> TEST PASS <<<
+uvm_soc_random_test_s8_seed1.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 259975000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=86.11% | cg_data=100.00%
+uvm_soc_random_test_s8_seed1.log: >>> TEST PASS <<<
+uvm_soc_random_test_s8_seed2026.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 324295000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=84.72% | cg_data=100.00%
+uvm_soc_random_test_s8_seed2026.log: >>> TEST PASS <<<
+uvm_soc_random_test_s8_seed42.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 243515000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=83.33% | cg_data=100.00%
+uvm_soc_random_test_s8_seed42.log: >>> TEST PASS <<<
+uvm_soc_random_test_s8_seed7.log:UVM_INFO ../verif/uvm/env/soc_coverage.sv(72) @ 277565000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=86.11% | cg_data=100.00%
+uvm_soc_random_test_s8_seed7.log: >>> TEST PASS <<<
