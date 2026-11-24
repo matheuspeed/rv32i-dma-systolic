@@ -112,7 +112,7 @@ COV_OPTS    =
 endif
 FW_HEX      = ../sw/firmware/firmware.hex
 
-.PHONY: uvm uvm-waves uvm-err uvm-regress
+.PHONY: uvm uvm-waves uvm-err uvm-regress cov-merge
 
 fw-imem: $(FW_HEX)
 	cp $(FW_HEX) imem.hex
@@ -148,3 +148,7 @@ uvm-regress:
 	done; done
 	@echo "=== Resumo da regressao ===" | tee regress_summary.log
 	@grep -H -E "TEST (PASS|FAIL)|Cobertura funcional" uvm_soc_*_seed*.log | tee -a regress_summary.log
+
+# Cobertura acumulada da regressão (IMC): combina cov_work/scope/*_seed* e imprime o resumo
+cov-merge:
+	imc -exec merge_cov.tcl | tee cov_merge.log

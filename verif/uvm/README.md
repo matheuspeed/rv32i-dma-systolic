@@ -90,6 +90,7 @@ make uvm ARRAY_SIZE=8                        # outra configuração da malha (2,
 make uvm-waves                               # grava formas de onda e abre o SimVision
 make uvm-err                                 # injeta uma falha no RTL (deve terminar em TEST FAIL)
 make uvm-regress                             # regressão completa
+make cov-merge                               # cobertura acumulada da regressão (IMC)
 ```
 
 | Variável | Padrão | Significado |
@@ -147,5 +148,6 @@ Amostrada a partir das transações publicadas pelo monitor (`soc_coverage`):
 | `cp_val` (`cg_data`) | −128, 0, 127 | valores extremos de A e B (sinal e magnitude do acumulador) |
 
 A coleta de cobertura é habilitada por padrão em `make uvm` (`-coverage all`) e pode ser desligada com `COV=0`. O percentual de cada
-covergroup aparece no fim do log; os bancos de dados ficam em `sim/cov_work/` e podem ser
-combinados e analisados no IMC.
+covergroup aparece no fim do log; os bancos de dados ficam em `sim/cov_work/`. Depois da
+regressão, `make cov-merge` combina as 18 execuções no IMC ([`sim/merge_cov.tcl`](../../sim/merge_cov.tcl))
+e imprime a cobertura acumulada. Resultado da regressão atual: **100% (27 de 27 bins)**.
