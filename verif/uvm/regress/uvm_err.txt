@@ -1,0 +1,262 @@
+xrun(64): 24.09-s013: (c) Copyright 1995-2025 Cadence Design Systems, Inc.
+TOOL:	xrun(64)	24.09-s013: Started on Nov 24, 2026 at 20:03:47 -03
+xrun
+	-uvm
+	-uvmhome CDNS-1.2
+	-timescale 1ns/1ps
+	-access +rwc
+	-nowarn CUVIHR
+	-svseed 1
+	+define+ARRAY_SIZE=4
+	-f filelists/uvm.f
+		../rtl/cpu/adder.v
+		../rtl/cpu/alu.v
+		../rtl/cpu/control.v
+		../rtl/cpu/extend_imm.v
+		../rtl/cpu/mux2.v
+		../rtl/cpu/mux4.v
+		../rtl/cpu/pc.v
+		../rtl/cpu/regfile.v
+		../rtl/cpu/riscv_top.v
+		../rtl/mem/imem.v
+		../rtl/mem/dmem_dp.v
+		../rtl/accel/mac.v
+		../rtl/accel/skew.v
+		../rtl/accel/systolic_array.v
+		../rtl/accel/accel_top.v
+		../rtl/dma/dma.v
+		../rtl/top/soc_top.v
+		+incdir+../verif/uvm/agents/soc_agent
+		+incdir+../verif/uvm/env
+		+incdir+../verif/uvm/tests
+		../verif/uvm/agents/soc_agent/soc_if.sv
+		../verif/uvm/agents/soc_agent/soc_agent_pkg.sv
+		../verif/uvm/env/soc_env_pkg.sv
+		../verif/uvm/tests/soc_tests_pkg.sv
+		../verif/uvm/top/top_tb.sv
+	-top top_tb
+	+UVM_TESTNAME=soc_directed_test
+	+define+INJECT_BUG
+	-l uvm_err.log
+Compiling UVM packages (uvm_pkg.sv cdns_uvm_pkg.sv) using uvmhome location /cadence/XCELIUM2409/tools/methodology/UVM/CDNS-1.2
+file: ../rtl/dma/dma.v
+	module worklib.dma:v
+		errors: 0, warnings: 0
+file: ../verif/uvm/top/top_tb.sv
+	module worklib.top_tb:sv
+		errors: 0, warnings: 0
+	Elaborating the design hierarchy:
+		Caching library 'worklib' ....... Done
+	Top level design units:
+		uvm_pkg
+		cdns_uvmapi
+		cdns_assert2uvm_pkg
+		cdns_uvm_pkg
+		soc_agent_pkg
+		soc_env_pkg
+		soc_tests_pkg
+		top_tb
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.mac:v <0x2b2e1092>
+			streams:   4, words:  1647
+		worklib.accel_top:v <0x2ce7342d>
+			streams:  18, words:  8438
+		worklib.dma:v <0x137eb5b7>
+			streams:  36, words: 22762
+		worklib.ALU:v <0x27fae8ae>
+			streams:   1, words:  1360
+		worklib.mux2:v <0x19a89092>
+			streams:   1, words:   234
+		worklib.extendImm:v <0x0d55dc95>
+			streams:   2, words:  1450
+		worklib.regfile:v <0x3c7fdaf3>
+			streams:   5, words:  2485
+		worklib.control:v <0x5d03038d>
+			streams:   2, words:  9185
+		worklib.imem:v <0x7f610056>
+			streams:   2, words:   574
+		worklib.mux4:v <0x6b3c35fc>
+			streams:   1, words:   362
+		worklib.adder:v <0x4a387c12>
+			streams:   1, words:   176
+		worklib.pc:v <0x2cde993f>
+			streams:   2, words:   453
+		worklib.riscv_top:v <0x623de971>
+			streams:  10, words:  2795
+		worklib.top_tb:sv <0x5cbbd4bd>
+			streams: 149, words: 172045
+		worklib.soc_env_pkg:sv <0x40043937>
+			streams: 120, words: 116872
+		worklib.soc_agent_pkg:sv <0x721ca938>
+			streams: 510, words: 787497
+		worklib.cdns_uvm_pkg:sv <0x4801ae6a>
+			streams: 237, words: 382393
+		worklib.cdns_uvmapi:svp <0x4a76a5b3>
+			streams:  27, words: 30445
+		worklib.cdns_assert2uvm_pkg:sv <0x741f0d47>
+			streams:   3, words:  1824
+		worklib.uvm_pkg:sv <0x1e2ed1f5>
+			streams: 5292, words: 8328719
+		worklib.soc_if:sv <0x773d6ec2>
+			streams:  19, words: 13841
+		worklib.skew:v <0x4ccc0b89>
+			streams:  16, words:  8197
+		worklib.systolic_array:v <0x2ea4cf8f>
+			streams:   2, words:   601
+		worklib.soc_top:v <0x630b5ecb>
+			streams:   3, words:   495
+		worklib.dmem_dp:v <0x2e51382b>
+			streams:  15, words: 14052
+	Building instance specific data structures.
+	Loading native compiled code:     .................... Done
+	Design hierarchy summary:
+		                        Instances  Unique
+		Modules:                       37      18
+		Interfaces:                     1       1
+		Verilog packages:               7       7
+		Registers:                 17,193  11,942
+		Scalar wires:                  31       -
+		Expanded wires:               576      24
+		Vectored wires:                99       -
+		Named events:                   7      15
+		Always blocks:                 65      44
+		Initial blocks:               356     178
+		Parallel blocks:               27      28
+		Cont. assignments:             55      50
+		Pseudo assignments:             9       -
+		Assertions:                     6       6
+		Covergroup Instances:           0       2
+		SV Class declarations:        240     354
+		SV Class specializations:     462     462
+		Process Clocks:                35       3
+		Simulation timescale:         1ps
+	Writing initial simulation snapshot: worklib.top_tb:sv
+Loading snapshot worklib.top_tb:sv .................... Done
+SVSEED set from command line: 1
+xcelium> source /cadence/XCELIUM2409/tools/xcelium/files/xmsimrc
+xcelium> source /cadence/XCELIUM2409/tools/methodology/UVM/CDNS-1.2/additions/sv/files/tcl/uvm_sim.tcl
+xcelium> run
+UVM_INFO /cadence/XCELIUM2409/tools/methodology/UVM/CDNS-1.2/sv/src/base/uvm_root.svh(412) @ 0: reporter [UVM/RELNOTES] 
+----------------------------------------------------------------
+CDNS-UVM-1.2 (24.09-s013)
+(C) 2007-2014 Mentor Graphics Corporation
+(C) 2007-2014 Cadence Design Systems, Inc.
+(C) 2006-2014 Synopsys, Inc.
+(C) 2011-2013 Cypress Semiconductor Corp.
+(C) 2013-2014 NVIDIA Corporation
+----------------------------------------------------------------
+
+  ***********       IMPORTANT RELEASE NOTES         ************
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_NO_DEPRECATED undefined.
+  See http://www.eda.org/svdb/view.php?id=3313 for more details.
+
+  You are using a version of the UVM library that has been compiled
+  with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR undefined.
+  See http://www.eda.org/svdb/view.php?id=3770 for more details.
+
+      (Specify +UVM_NO_RELNOTES to turn off this notice)
+
+UVM_INFO @ 0: reporter [RNTST] Running test soc_directed_test...
+UVM_INFO /cadence/XCELIUM2409/tools/methodology/UVM/CDNS-1.2/sv/src/base/uvm_root.svh(605) @ 0: reporter [UVMTOP] UVM testbench topology:
+------------------------------------------------------------------
+Name                       Type                        Size  Value
+------------------------------------------------------------------
+uvm_test_top               soc_directed_test           -     @1691
+  env                      soc_env                     -     @1769
+    agent                  soc_agent                   -     @1801
+      drv                  soc_driver                  -     @3368
+        rsp_port           uvm_analysis_port           -     @3468
+        seq_item_port      uvm_seq_item_pull_port      -     @3418
+      mon                  soc_monitor                 -     @2638
+        ap                 uvm_analysis_port           -     @2690
+      sqr                  soc_sequencer               -     @2721
+        rsp_export         uvm_analysis_export         -     @2781
+        seq_item_export    uvm_seq_item_pull_imp       -     @3337
+        arbitration_queue  array                       0     -    
+        lock_queue         array                       0     -    
+        num_last_reqs      integral                    32    'd1  
+        num_last_rsps      integral                    32    'd1  
+    coverage               soc_coverage                -     @2555
+      analysis_imp         uvm_analysis_imp            -     @2604
+    ref_model              soc_ref_model               -     @1832
+      analysis_imp         uvm_analysis_imp            -     @1882
+      exp_ap               uvm_analysis_port           -     @1934
+    scoreboard             soc_scoreboard              -     @1965
+      exp_fifo             uvm_tlm_analysis_fifo #(T)  -     @2279
+        analysis_export    uvm_analysis_imp            -     @2524
+        get_ap             uvm_analysis_port           -     @2474
+        get_peek_export    uvm_get_peek_imp            -     @2376
+        put_ap             uvm_analysis_port           -     @2425
+        put_export         uvm_put_imp                 -     @2327
+      obs_fifo             uvm_tlm_analysis_fifo #(T)  -     @1964
+        analysis_export    uvm_analysis_imp            -     @2247
+        get_ap             uvm_analysis_port           -     @2196
+        get_peek_export    uvm_get_peek_imp            -     @2096
+        put_ap             uvm_analysis_port           -     @2146
+        put_export         uvm_put_imp                 -     @2046
+------------------------------------------------------------------
+
+SDI/Verilog Transaction Recording Facility Version 24.09-s013
+UVM_INFO ../verif/uvm/agents/soc_agent/soc_monitor.sv(73) @ 1915000: uvm_test_top.env.agent.mon [MON] Operacao concluida: MatMul(M=4, N=4, K=8, IRQ_EN=0, Cycles=170)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 1915000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #1 [4x4x8] C[0][0]: esperado=0xffffed19 (-4839), obtido=0xffffed1a (-4838)
+UVM_INFO ../verif/uvm/agents/soc_agent/soc_monitor.sv(73) @ 19835000: uvm_test_top.env.agent.mon [MON] Operacao concluida: MatMul(M=8, N=8, K=24, IRQ_EN=1, Cycles=1771)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 19835000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #2 [8x8x24] C[0][0]: esperado=0x00005a6a (23146), obtido=0x00005a6b (23147)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 19835000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #2 [8x8x24] C[0][4]: esperado=0xffffb1b7 (-20041), obtido=0xffffb1b8 (-20040)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 19835000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #2 [8x8x24] C[4][0]: esperado=0x000119ef (72175), obtido=0x000119f0 (72176)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 19835000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #2 [8x8x24] C[4][4]: esperado=0xffffe65a (-6566), obtido=0xffffe65b (-6565)
+UVM_INFO ../verif/uvm/agents/soc_agent/soc_monitor.sv(73) @ 23305000: uvm_test_top.env.agent.mon [MON] Operacao concluida: MatMul(M=4, N=4, K=17, IRQ_EN=1, Cycles=326)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 23305000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #3 [4x4x17] C[0][0]: esperado=0x00044000 (278528), obtido=0x00044001 (278529)
+UVM_INFO ../verif/uvm/agents/soc_agent/soc_monitor.sv(73) @ 24015000: uvm_test_top.env.agent.mon [MON] Operacao concluida: MatMul(M=4, N=4, K=1, IRQ_EN=0, Cycles=50)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 24015000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #4 [4x4x1] C[0][0]: esperado=0x00000000 (0), obtido=0x00000001 (1)
+UVM_INFO ../verif/uvm/agents/soc_agent/soc_monitor.sv(73) @ 27275000: uvm_test_top.env.agent.mon [MON] Operacao concluida: MatMul(M=4, N=4, K=16, IRQ_EN=0, Cycles=305)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 27275000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #5 [4x4x16] C[0][0]: esperado=0xffffe371 (-7311), obtido=0xffffe372 (-7310)
+UVM_INFO ../verif/uvm/agents/soc_agent/soc_monitor.sv(73) @ 33295000: uvm_test_top.env.agent.mon [MON] Operacao concluida: MatMul(M=4, N=4, K=32, IRQ_EN=1, Cycles=581)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 33295000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #6 [4x4x32] C[0][0]: esperado=0xffff1ca7 (-58201), obtido=0xffff1ca8 (-58200)
+UVM_INFO ../verif/uvm/agents/soc_agent/soc_monitor.sv(73) @ 39615000: uvm_test_top.env.agent.mon [MON] Operacao concluida: MatMul(M=4, N=4, K=33, IRQ_EN=0, Cycles=611)
+UVM_ERROR ../verif/uvm/env/soc_scoreboard.sv(39) @ 39615000: uvm_test_top.env.scoreboard [SCB] Divergencia na op #7 [4x4x33] C[0][0]: esperado=0xfffefbb6 (-66634), obtido=0xfffefbb7 (-66633)
+UVM_INFO /cadence/XCELIUM2409/tools/methodology/UVM/CDNS-1.2/sv/src/base/uvm_objection.svh(1271) @ 39635000: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+xmsim: *N,COVNSM: (File: ../verif/uvm/env/soc_coverage.sv, Line: 82):(Time: 39635 NS + 44) Sampling of covergroup type "soc_coverage::cg_soc" (../verif/uvm/env/soc_coverage.sv:7), referred in the statement is not enabled. As a result, coverage methods get_coverage(), get_inst_coverage(), get_hitcount(), and get_inst_hitcount() will return 0 coverage.
+xmsim: *N,COVNSM: (File: ../verif/uvm/env/soc_coverage.sv, Line: 82):(Time: 39635 NS + 44) Sampling of covergroup type "soc_coverage::cg_data" (../verif/uvm/env/soc_coverage.sv:54), referred in the statement is not enabled. As a result, coverage methods get_coverage(), get_inst_coverage(), get_hitcount(), and get_inst_hitcount() will return 0 coverage.
+UVM_INFO ../verif/uvm/env/soc_coverage.sv(82) @ 39635000: uvm_test_top.env.coverage [COV] Cobertura funcional: cg_soc=0.00% | cg_data=0.00%
+UVM_INFO ../verif/uvm/env/soc_coverage.sv(90) @ 39635000: uvm_test_top.env.coverage [COV]   cg_soc: array_size=0.00% k_blocks=0.00% k_boundary=0.00% m_blocks=0.00% n_blocks=0.00% irq_mode=0.00% cross=0.00%
+=================================================================
+ RESUMO SCOREBOARD: Total=7 | Acertos=0 | Divergencias=7
+ UVM_ERROR=10 | UVM_FATAL=0
+ >>> TEST FAIL <<<
+=================================================================
+UVM_INFO /cadence/XCELIUM2409/tools/methodology/UVM/CDNS-1.2/sv/src/base/uvm_report_catcher.svh(705) @ 39635000: reporter [UVM/REPORT/CATCHER] 
+--- UVM Report catcher Summary ---
+
+
+Number of demoted UVM_FATAL reports  :    0
+Number of demoted UVM_ERROR reports  :    0
+Number of demoted UVM_WARNING reports:    0
+Number of caught UVM_FATAL reports   :    0
+Number of caught UVM_ERROR reports   :    0
+Number of caught UVM_WARNING reports :    0
+
+UVM_INFO /cadence/XCELIUM2409/tools/methodology/UVM/CDNS-1.2/sv/src/base/uvm_report_server.svh(851) @ 39635000: reporter [UVM/REPORT/SERVER] 
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :   14
+UVM_WARNING :    0
+UVM_ERROR :   10
+UVM_FATAL :    0
+** Report counts by id
+[COV]     2
+[MON]     7
+[RNTST]     1
+[SCB]    10
+[TEST_DONE]     1
+[UVM/RELNOTES]     1
+[UVM/REPORT/CATCHER]     1
+[UVMTOP]     1
+
+Simulation complete via $finish(1) at time 39635 NS + 64
+/cadence/XCELIUM2409/tools/methodology/UVM/CDNS-1.2/sv/src/base/uvm_root.svh:543     $finish;
+xcelium> exit
+TOOL:	xrun(64)	24.09-s013: Exiting on Nov 24, 2026 at 20:03:59 -03  (total: 00:00:12)
