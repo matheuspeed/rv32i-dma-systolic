@@ -111,9 +111,9 @@ A regressão gera também `regress_summary.log`, com o veredito e a cobertura de
 
 | Teste | Operações | O que verifica | Resultado esperado |
 |---|---|---|---|
-| `soc_directed_test` | 4 | (1) um bloco S × S com K = 8, polling; (2) 8 × 8 × 24: tiling em M, N e K, com `irq`; (3) pior caso, todos os elementos −128 com K = 17 (dois pedaços de K); (4) matriz zero com K = 1 | `TEST PASS`, 4 operações corretas |
+| `soc_directed_test` | 7 | (1) um bloco S × S com K = 8, polling; (2) 8 × 8 × 24: tiling em M, N e K, com `irq`; (3) pior caso, todos os elementos −128 com K = 17 (dois pedaços de K); (4) matriz zero com K = 1; (5–7) fronteiras do tiling em K: K = 16 (buffer cheio), 32 (dois pedaços cheios) e 33 (terceiro pedaço com um elemento) | `TEST PASS`, 7 operações corretas |
 | `soc_random_test` | 15 (`+NTXNS`) | dimensões e dados aleatórios: M e N múltiplos de `ARRAY_SIZE` (2 a 16), K de 1 a 36, matrizes não quadradas, polling e `irq`; extremos (−128, 0, 127) com ~10% de chance cada | `TEST PASS`, todas as operações corretas |
-| `make uvm-err` | 4 | `soc_directed_test` com `+define+INJECT_BUG`, que faz o DMA gravar o primeiro elemento de cada bloco de C com +1 | `TEST FAIL`, com o scoreboard apontando cada elemento divergente |
+| `make uvm-err` | 7 | `soc_directed_test` com `+define+INJECT_BUG`, que faz o DMA gravar o primeiro elemento de cada bloco de C com +1 | `TEST FAIL`, com o scoreboard apontando cada elemento divergente |
 
 A regressão (`make uvm-regress`) executa o teste dirigido com `ARRAY_SIZE` = 2, 4 e 8 e o teste
 aleatório com as 5 seeds em cada tamanho: 18 execuções, todas com `TEST PASS` esperado.
@@ -142,6 +142,7 @@ Amostrada a partir das transações publicadas pelo monitor (`soc_coverage`):
 |---|---|---|
 | `cp_array_size` | 2, 4, 8 | as três configurações da malha (fecha na cobertura acumulada da regressão) |
 | `cp_k_blocks` | 1, 2, ≥ 3 passagens | tiling em K (`BUF_DEPTH` = 16) |
+| `cp_k_boundary` | K = 1, 16, 17, 32, 33 | fronteiras do tiling em K: pedaço mínimo, buffer exatamente cheio e último pedaço com um único elemento |
 | `cp_m_blocks`, `cp_n_blocks` | 1, ≥ 2 blocos | tiling em M e N (laços de blocos do DMA), medido em blocos para ser alcançável em qualquer configuração |
 | `cp_irq_mode` | polling, irq | os dois modos de término |
 | `cx_blocks_k_irq` | cross de blocos em M × passagens em K × término | combinações de tiling com os dois modos de término |
@@ -150,4 +151,4 @@ Amostrada a partir das transações publicadas pelo monitor (`soc_coverage`):
 A coleta de cobertura é habilitada por padrão em `make uvm` (`-coverage all`) e pode ser desligada com `COV=0`. O percentual de cada
 covergroup aparece no fim do log; os bancos de dados ficam em `sim/cov_work/`. Depois da
 regressão, `make cov-merge` combina as 18 execuções no IMC ([`sim/merge_cov.tcl`](../../sim/merge_cov.tcl))
-e imprime a cobertura acumulada. Resultado da regressão atual: **100% (27 de 27 bins)**.
+e imprime a cobertura acumulada. Resultado da regressão atual: **100% (32 de 32 bins)**.

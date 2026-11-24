@@ -20,6 +20,16 @@ class soc_coverage extends uvm_subscriber #(soc_seq_item);
             bins two_blks = {2};
             bins gt_two   = {[3:$]};
         }
+        // COV-02b: Fronteiras do tiling em K (plano de verificação, seção 6.2):
+        // pedaço mínimo, buffer exatamente cheio e um elemento além do buffer,
+        // onde o último pedaço tem klen = 1.
+        cp_k_boundary: coverpoint tr.K {
+            bins k1  = {1};    // menor pedaço possível
+            bins k16 = {16};   // um pedaço com o buffer exatamente cheio
+            bins k17 = {17};   // segundo pedaço com klen = 1
+            bins k32 = {32};   // dois pedaços cheios
+            bins k33 = {33};   // terceiro pedaço com klen = 1
+        }
         // COV-03: Dimensões M e N medidas em blocos de ARRAY_SIZE (laços ti e tj do DMA).
         // Em blocos, todos os bins são alcançáveis em qualquer configuração; em valores
         // absolutos, M = 2 ou 4 seriam impossíveis com ARRAY_SIZE = 8.
@@ -70,9 +80,10 @@ class soc_coverage extends uvm_subscriber #(soc_seq_item);
         super.report_phase(phase);
         `uvm_info("COV", $sformatf("Cobertura funcional: cg_soc=%.2f%% | cg_data=%.2f%%",
                                    cg_soc.get_inst_coverage(), cg_data.get_inst_coverage()), UVM_NONE)
-        `uvm_info("COV", $sformatf("  cg_soc: array_size=%.2f%% k_blocks=%.2f%% m_blocks=%.2f%% n_blocks=%.2f%% irq_mode=%.2f%% cross=%.2f%%",
+        `uvm_info("COV", $sformatf("  cg_soc: array_size=%.2f%% k_blocks=%.2f%% k_boundary=%.2f%% m_blocks=%.2f%% n_blocks=%.2f%% irq_mode=%.2f%% cross=%.2f%%",
                                    cg_soc.cp_array_size.get_inst_coverage(),
                                    cg_soc.cp_k_blocks.get_inst_coverage(),
+                                   cg_soc.cp_k_boundary.get_inst_coverage(),
                                    cg_soc.cp_m_blocks.get_inst_coverage(),
                                    cg_soc.cp_n_blocks.get_inst_coverage(),
                                    cg_soc.cp_irq_mode.get_inst_coverage(),

@@ -44,6 +44,26 @@ class soc_directed_seq extends uvm_sequence #(soc_seq_item);
             foreach (B[i]) B[i] == 0;
         }) `uvm_fatal("RAND", "Falha ao randomizar req_zero")
         finish_item(req);
+
+        // 5 a 7. Fronteiras do tiling em K (fecham cp_k_boundary):
+        // buffer exatamente cheio, dois pedaços cheios e terceiro pedaço com klen = 1
+        req = soc_seq_item::type_id::create("req_k16");
+        start_item(req);
+        if (!req.randomize() with { M == array_size; N == array_size; K == 16; irq_en == 0; })
+            `uvm_fatal("RAND", "Falha ao randomizar req_k16")
+        finish_item(req);
+
+        req = soc_seq_item::type_id::create("req_k32");
+        start_item(req);
+        if (!req.randomize() with { M == array_size; N == array_size; K == 32; irq_en == 1; })
+            `uvm_fatal("RAND", "Falha ao randomizar req_k32")
+        finish_item(req);
+
+        req = soc_seq_item::type_id::create("req_k33");
+        start_item(req);
+        if (!req.randomize() with { M == array_size; N == array_size; K == 33; irq_en == 0; })
+            `uvm_fatal("RAND", "Falha ao randomizar req_k33")
+        finish_item(req);
     endtask
 endclass
 
