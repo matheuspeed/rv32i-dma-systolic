@@ -1,0 +1,12 @@
+IMC(64): 24.09-a001: (c) Copyright 1995-2024 Cadence Design Systems Inc - Simulator version: 24.09-s013 - Coverage engine version: 24.09-s013
+Starting batch mode
+Total conflicts during target model creation: 0
+Total items not merged                      : 0
+Total runs not considered during target model creation: 0
+Total runs not merged                                 : 0
+name                                     CoverGroup Average   CoverGroup Covered   
+-----------------------------------------------------------------------------------
+uvm_pkg                                  n/a                  n/a                  
+|--uvm_test_top                          n/a                  n/a                  
+| |--env                                 n/a                  n/a                  
+| | |--coverage                          100.00%              100.00% (27/27)      
