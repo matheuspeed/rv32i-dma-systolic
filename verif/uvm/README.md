@@ -44,6 +44,12 @@ blocos de C e grava o resultado na memória de dados.
 
 ## Estrutura
 
+![Arquitetura do ambiente UVM](../../docs/figures/uvm_arquitetura.png)
+
+O teste cria o `soc_env` e inicia a sequence. O driver carrega a memória por backdoor e libera o
+reset; o firmware configura o DMA. O monitor observa o barramento e publica cada operação para o
+reference model, o scoreboard e a cobertura.
+
 ```
 verif/uvm/
 ├── agents/soc_agent/   agente: interface, transação, configuração, sequencer, driver,
