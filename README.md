@@ -69,6 +69,7 @@ make accel-waves  # malha 2×2, gravando as formas de onda e abrindo o SimVision
 make mem          # memória de dados dual-port
 make accel-top    # wrapper do acelerador (buffers + controle) 2×2 e 4×4
 make dma          # DMA + memória + acelerador sem CPU (3 configurações)
+make uvm          # sistema completo no ambiente UVM (ver verif/uvm/README.md)
 make clean
 ```
 
@@ -89,6 +90,10 @@ registradores) em três configurações e compara a memória inteira com o golde
 | `make dma-tiled-s4` | 8 × 8 × 24 | 4 | o mesmo, com malha 4×4 |
 
 Detalhes e resultados em [`docs/dma.md`](docs/dma.md#verificação).
+
+O `make uvm` roda o sistema completo (CPU + firmware + DMA + acelerador) no ambiente UVM, com
+scoreboard, assertions e cobertura funcional. Testes, regressão e resultados em
+[`verif/uvm/README.md`](verif/uvm/README.md).
 
 ## Modelo de referência (golden model)
 

@@ -4,11 +4,19 @@
 #    make cpu          processador RV32I (testbench unitário, modo texto)
 #    make cpu-waves    idem, gravando formas de onda e abrindo o SimVision
 #    make clean        apaga os arquivos gerados pelo simulador
-#    make accel        malha sistólica 2×2 e 4×4
+#    make accel        malha sistólica 2×2 e 4×4 (accel-2 / accel-4: um tamanho só)
 #    make accel-waves  malha 2×2, gravando formas de onda e abrindo o SimVision
 #    make mem          memória de dados dual-port (testbench unitário)
-#    make accel-top    wrapper do acelerador (buffers + controle) 2×2 e 4×4
-#    make dma          DMA + memória + acelerador sem CPU (3 vetores: basic, tiled, tiled-s4)
+#    make accel-top    wrapper do acelerador 2×2 e 4×4 (accel-top-2 / accel-top-4)
+#    make dma          DMA + memória + acelerador sem CPU (dma-basic, dma-tiled, dma-tiled-s4)
+#
+#  Ambiente UVM (sistema completo; detalhes em verif/uvm/README.md):
+#    make uvm          teste dirigido (UVM_TEST=, SEED=, ARRAY_SIZE=, COV=0/1)
+#    make uvm-waves    idem, gravando formas de onda e abrindo o SimVision
+#    make waves        reabre o waves.shm existente no SimVision
+#    make uvm-err      injeta uma falha no RTL (deve terminar em TEST FAIL)
+#    make uvm-regress  regressão: dirigido + aleatório (5 seeds) × ARRAY_SIZE 2, 4, 8
+#    make cov-merge    merge da cobertura da regressão no IMC
 #
 #  Simulador padrão: Xcelium (xrun). Para usar o Icarus Verilog:
 #    make cpu SIM=iverilog

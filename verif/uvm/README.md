@@ -94,6 +94,7 @@ make uvm                                     # teste dirigido, ARRAY_SIZE = 4, s
 make uvm UVM_TEST=soc_random_test SEED=7     # teste aleatório com outra seed
 make uvm ARRAY_SIZE=8                        # outra configuração da malha (2, 4 ou 8)
 make uvm-waves                               # grava formas de onda e abre o SimVision
+make waves                                   # reabre o waves.shm existente, sem simular de novo
 make uvm-err                                 # injeta uma falha no RTL (deve terminar em TEST FAIL)
 make uvm-regress                             # regressão completa
 make cov-merge                               # cobertura acumulada da regressão (IMC)
@@ -129,13 +130,14 @@ aleatório com as 5 seeds em cada tamanho: 18 execuções, todas com `TEST PASS`
 - **Scoreboard:** compara cada elemento de C com o esperado e reporta divergências com
   `` `uvm_error `` (operação, dimensões, linha, coluna, valor esperado e obtido). No
   `check_phase`, acusa operações sem par entre observado e esperado.
-- **Assertions** (na interface):
+- **Assertions** (em `soc_if.sv`); uma falha gera `` `uvm_error("SVA", ...) `` e entra na
+  contagem de `UVM_ERROR` e no veredito:
 
   | ID | Propriedade |
   |---|---|
   | AST-01 | `acc_start` ⇒ `acc_busy` no ciclo seguinte |
   | AST-02 | `acc_done` dura exatamente 1 ciclo |
-  | AST-03 | a CPU não escreve na região de C enquanto o acelerador está ocupado (autonomia do DMA) |
+  | AST-03 | a CPU não escreve na região de C enquanto o acelerador está ocupado (autonomia do DMA). A região é a da operação em curso, de `ADDR_C` até `ADDR_C + M·N·4`, capturada no barramento quando o firmware programa o DMA |
 
 - **Marcador em C:** a região de C é preenchida com `0xDEADBEEF` antes de cada operação, para que
   um elemento não gravado pelo DMA apareça como divergência.
@@ -157,4 +159,28 @@ Amostrada a partir das transações publicadas pelo monitor (`soc_coverage`):
 A coleta de cobertura é habilitada por padrão em `make uvm` (`-coverage all`) e pode ser desligada com `COV=0`. O percentual de cada
 covergroup aparece no fim do log; os bancos de dados ficam em `sim/cov_work/`. Depois da
 regressão, `make cov-merge` combina as 18 execuções no IMC ([`sim/merge_cov.tcl`](../../sim/merge_cov.tcl))
-e imprime a cobertura acumulada. Resultado da regressão atual: **100% (32 de 32 bins)**.
+e imprime a cobertura acumulada. Para abrir o resultado na interface gráfica do IMC:
+`imc -load cov_work/scope/merged &`.
+
+## Resultados da regressão atual
+
+| Métrica | Resultado |
+|---|---|
+| Execuções (`make uvm-regress`) | 18/18 `TEST PASS`, 0 `UVM_ERROR`, 0 falhas de assertion |
+| Cobertura funcional (merge) | **100%** (32 de 32 bins) |
+| Cobertura de código do DUT | 74% (bloco 89,6%, expressão 93%, toggle 53,8%) |
+| Cobertura de FSM (DMA e acelerador) | 100% |
+| Assertions | 4 de 6 itens: AST-03 passa de forma vacuosa, pois a CPU nunca escreve em C durante uma operação (o comportamento esperado) |
+| Injeção de erro (`make uvm-err`) | `TEST FAIL` com 10 divergências (uma por bloco de C) |
+
+O que falta na cobertura de código é estrutural: o firmware usa poucas instruções da CPU, e os
+bits altos do acumulador, dos endereços e dos contadores não alternam com memória de 4 KB e K
+pequeno. As evidências estão em [`regress/`](regress/): `regress_summary.txt` (veredito e
+cobertura de cada execução), `cov_merge.txt` (merge no IMC) e `uvm_err.txt` (injeção de erro).
+
+## Formas de onda (SimVision)
+
+`make uvm-waves` abre o SimVision com a configuração [`sim/waves_demo.svcf`](../../sim/waves_demo.svcf):
+cinco grupos na ordem de uma operação (E1 a CPU configura o DMA, E2 o DMA carrega A e B, E3 a
+malha calcula, E4 o DMA grava C, E5 o término) e grupos de detalhe fechados. Os valores de C e
+dos buffers aparecem em decimal com sinal pelas cópias `dbg_*` declaradas no `top_tb`.
