@@ -11,7 +11,7 @@
 #    make dma          DMA + memória + acelerador sem CPU (dma-basic, dma-tiled, dma-tiled-s4)
 #
 #  Ambiente UVM (sistema completo; detalhes em verif/uvm/README.md):
-#    make uvm          teste dirigido (UVM_TEST=, SEED=, ARRAY_SIZE=, COV=0/1)
+#    make uvm          teste dirigido (UVM_TEST=, SEED=, ARRAY_SIZE=, NTXNS=, COV=0/1)
 #    make uvm-waves    idem, gravando formas de onda e abrindo o SimVision
 #    make waves        reabre o waves.shm existente no SimVision
 #    make uvm-err      injeta uma falha no RTL (deve terminar em TEST FAIL)
@@ -111,6 +111,8 @@ dma-tiled-s4:
 ARRAY_SIZE ?= 4
 UVM_TEST   ?= soc_directed_test
 SEED       ?= 1
+NTXNS      ?=
+NTXNS_ARG   = $(if $(NTXNS),+NTXNS=$(NTXNS))
 REGRESS_SEEDS ?= 1 7 42 123 2026
 COV        ?= 1
 ifeq ($(COV),1)
@@ -129,15 +131,15 @@ uvm: fw-imem
 	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) -nowarn CUVIHR \
 	  $(COV_OPTS) \
 	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
-	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) \
+	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) $(NTXNS_ARG) \
 	  -l uvm_$(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED).log
 	@echo "=== Resultado ==="
-	@grep -E "coverage \[COV\]|TEST (PASS|FAIL)|UVM_(ERROR|FATAL)=" uvm_$(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED).log
+	@grep -E "coverage \[COV\]|RESUMO SCOREBOARD|TEST (PASS|FAIL)|UVM_(ERROR|FATAL)=" uvm_$(UVM_TEST)_s$(ARRAY_SIZE)_seed$(SEED).log
 
 uvm-waves: fw-imem
 	xrun -uvm -uvmhome CDNS-1.2 $(XRUN_OPTS) -nowarn CUVIHR \
 	  -svseed $(SEED) +define+ARRAY_SIZE=$(ARRAY_SIZE) \
-	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) \
+	  -f filelists/uvm.f -top top_tb +UVM_TESTNAME=$(UVM_TEST) $(NTXNS_ARG) \
 	  -input probe.tcl -l uvm_waves.log
 	simvision -input waves_demo.svcf waves.shm &
 

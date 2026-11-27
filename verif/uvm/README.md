@@ -105,10 +105,12 @@ make cov-merge                               # cobertura acumulada da regressão
 | `UVM_TEST` | `soc_directed_test` | teste a executar (`+UVM_TESTNAME`) |
 | `ARRAY_SIZE` | `4` | tamanho da malha (2, 4 ou 8) |
 | `SEED` | `1` | semente da randomização (`-svseed`); a mesma seed reproduz os mesmos casos |
+| `NTXNS` | (vazio = 15) | número de operações do `soc_random_test` |
 | `REGRESS_SEEDS` | `1 7 42 123 2026` | seeds usadas pelo teste aleatório na regressão |
 | `COV` | `1` | coleta de cobertura (`1` liga, `0` desliga); ex.: `make uvm COV=0` |
 
-O número de operações do teste aleatório pode ser alterado com o plusarg `+NTXNS=<n>` (padrão 15).
+O número de operações do teste aleatório pode ser alterado com `NTXNS` (plusarg `+NTXNS=<n>`, padrão 15):
+`make uvm UVM_TEST=soc_random_test SEED=7 NTXNS=40`.
 
 Cada execução gera `uvm_<teste>_s<ARRAY_SIZE>_seed<SEED>.log`, que termina com o resumo do
 scoreboard, a contagem de `UVM_ERROR`/`UVM_FATAL` e o veredito `TEST PASS` ou `TEST FAIL`.
